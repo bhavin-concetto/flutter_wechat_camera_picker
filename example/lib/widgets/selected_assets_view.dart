@@ -5,16 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
+import '../extensions/l10n_extensions.dart';
 import 'asset_widget_builder.dart';
 import 'preview_asset_widget.dart';
 
 class SelectedAssetView extends StatelessWidget {
   const SelectedAssetView({
-    Key? key,
+    super.key,
     required this.asset,
     required this.isDisplayingDetail,
     required this.onRemoveAsset,
-  }) : super(key: key);
+  });
 
   final AssetEntity asset;
   final ValueNotifier<bool> isDisplayingDetail;
@@ -76,7 +77,7 @@ class SelectedAssetView extends StatelessWidget {
                 child: child!,
               ),
               child: _selectedAssetDeleteButton(context),
-            )
+            ),
           ],
         ),
       ),
@@ -102,7 +103,7 @@ class SelectedAssetView extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const Text('Selected Assets'),
+                    Text(context.l10n.selectedAssetsText),
                     Padding(
                       padding: const EdgeInsetsDirectional.only(start: 10),
                       child: Icon(
