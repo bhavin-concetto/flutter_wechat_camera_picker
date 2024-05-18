@@ -13,7 +13,7 @@ import '../widgets/method_list_view.dart';
 import '../widgets/selected_assets_view.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _MyHomePageState();
@@ -57,14 +57,14 @@ class _MyHomePageState extends State<HomePage> {
                 sortKey: const OrdinalSortKey(0),
                 child: Text(
                   'WeChat Camera Picker',
-                  style: Theme.of(context).textTheme.headline6,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
               Semantics(
                 sortKey: const OrdinalSortKey(0.1),
                 child: Text(
                   'Version: ${packageVersion ?? 'unknown'}',
-                  style: Theme.of(context).textTheme.caption,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             ],

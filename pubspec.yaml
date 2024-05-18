@@ -15,19 +15,22 @@ repository: https://github.com/fluttercandies/flutter_wechat_camera_picker
 issue_tracker: https://github.com/fluttercandies/flutter_wechat_camera_picker/issues
 
 environment:
-  sdk: '>=2.18.0 <4.0.0'
-  flutter: '>=3.3.0'
+  sdk: ^3.2.0
+  flutter: '>=3.16.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
+  wechat_picker_library: ^1.0.0
+
   camera: ^0.10.0
   camera_platform_interface: ^2.1.5
+
   path: ^1.8.0
-  photo_manager: ^3.0.0-dev.1
+  photo_manager: ^3.0.0
   photo_manager_image_provider: ^2.0.0
-  sensors_plus: ^3.1.0
+  sensors_plus: '>=4.0.0 <6.0.0'
   video_player: ^2.7.0
 
 dev_dependencies:
