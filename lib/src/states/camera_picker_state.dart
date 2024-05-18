@@ -228,7 +228,7 @@ class CameraPickerState extends State<CameraPicker>
     Constants.textDelegate = widget.pickerConfig.textDelegate ??
         cameraPickerTextDelegateFromLocale(widget.locale);
     initCameras();
-    accelerometerSubscription = accelerometerEvents.listen(
+    accelerometerSubscription = accelerometerEventStream().listen(
       handleAccelerometerEvent,
     );
   }
