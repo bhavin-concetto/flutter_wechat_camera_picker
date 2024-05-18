@@ -6,10 +6,42 @@ that can be found in the LICENSE file. -->
 
 See the [Migration Guide](guides/migration_guide.md) for breaking changes between versions.
 
-## 4.2.0-dev.1
+## 4.2.2
 
+### Fixes
+
+- Allows `wrapControllerMethod` to return nullable result.
+- Allows newer versions of `sensors_plus`.
+
+### Improvements
+
+- Provide the back button when no controller has been initialized.
+- Improves paddings of the heading actions in the viewer.
+
+## 4.2.1
+
+### Fixes
+
+- Fix ignore locks when exception throws.
+
+## 4.2.0
+
+### Breaking changes
+
+- Migrate to Flutter 3.16, and drop supports for previous Flutter versions.
 - Bump `photo_manager` to v3.x.
 - Export `photo_manager_image_provider`.
+
+### Improvements
+
+- Roll `sensors_plus`.
+- Catch exceptions when obtain/subscribe to the accelerometer stream.
+- Use `wechat_picker_library`.
+
+### Fixes
+
+- Fix `onEntitySaving` not returned after called. (#223)
+- Predicate access denied to avoid deadlocks.
 
 ## 4.1.0
 

@@ -10,12 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:path/path.dart' as path;
 import 'package:video_player/video_player.dart';
+import 'package:wechat_picker_library/wechat_picker_library.dart';
 
-import '../constants/constants.dart';
+import '../internals/singleton.dart';
 import '../constants/enums.dart';
-import '../constants/styles.dart';
 import '../constants/type_defs.dart';
-import '../internals/extensions.dart';
 import '../internals/methods.dart';
 import '../widgets/camera_picker.dart';
 import '../widgets/camera_picker_viewer.dart';
@@ -25,8 +24,8 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
   /// 播放器是否在播放
   final ValueNotifier<bool> isPlaying = ValueNotifier<bool>(false);
 
-  late final ThemeData theme =
-      widget.pickerConfig.theme ?? CameraPicker.themeData(wechatThemeColor);
+  late final ThemeData theme = widget.pickerConfig.theme ??
+      CameraPicker.themeData(defaultThemeColorWeChat);
 
   /// Construct an [File] instance through [previewXFile].
   /// 通过 [previewXFile] 构建 [File] 实例。
@@ -130,7 +129,8 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
     setState(() {
       isSavingEntity = true;
     });
-    final CameraPickerViewType viewType = widget.viewType;
+
+    // Handle the explicitly entity saving method.
     if (widget.pickerConfig.onEntitySaving != null) {
       try {
         await widget.pickerConfig.onEntitySaving!(
@@ -145,12 +145,14 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
           isSavingEntity = false;
         });
       }
+      return;
     }
+
     AssetEntity? entity;
     try {
       final PermissionState ps = await PhotoManager.requestPermissionExtend();
       if (ps == PermissionState.authorized || ps == PermissionState.limited) {
-        switch (viewType) {
+        switch (widget.viewType) {
           case CameraPickerViewType.image:
             final String filePath = previewFile.path;
             entity = await PhotoManager.editor.saveImageWithPath(
@@ -167,7 +169,10 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
         }
         if (widget.pickerConfig.shouldDeletePreviewFile &&
             previewFile.existsSync()) {
-          previewFile.delete();
+          previewFile.delete().catchError((e, s) {
+            handleErrorWithHandler(e, s, onError);
+            return previewFile;
+          });
         }
         return;
       }
@@ -196,32 +201,29 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
   Widget buildBackButton(BuildContext context) {
     return Semantics(
       sortKey: const OrdinalSortKey(0),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: IconButton(
-          onPressed: () {
-            if (isSavingEntity) {
-              return;
-            }
-            if (previewFile.existsSync()) {
-              previewFile.delete();
-            }
-            Navigator.of(context).pop();
-          },
-          padding: EdgeInsets.zero,
-          constraints: BoxConstraints.tight(const Size.square(28)),
-          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-          iconSize: 18,
-          icon: Container(
-            padding: const EdgeInsets.all(5),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.keyboard_return_rounded,
-              color: Colors.black,
-            ),
+      child: IconButton(
+        onPressed: () {
+          if (isSavingEntity) {
+            return;
+          }
+          if (previewFile.existsSync()) {
+            previewFile.delete();
+          }
+          Navigator.of(context).pop();
+        },
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints.tight(const Size.square(28)),
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        iconSize: 18,
+        icon: Container(
+          padding: const EdgeInsets.all(5),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.keyboard_return_rounded,
+            color: Colors.black,
           ),
         ),
       ),
@@ -247,9 +249,9 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
     }
     return MergeSemantics(
       child: Semantics(
-        label: Constants.textDelegate.sActionPreviewHint,
+        label: Singleton.textDelegate.sActionPreviewHint,
         image: true,
-        onTapHint: Constants.textDelegate.sActionPreviewHint,
+        onTapHint: Singleton.textDelegate.sActionPreviewHint,
         sortKey: const OrdinalSortKey(1),
         child: builder,
       ),
@@ -270,7 +272,7 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
       onPressed: createAssetEntityAndPop,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       child: Text(
-        Constants.textDelegate.confirm,
+        Singleton.textDelegate.confirm,
         style: TextStyle(
           color: theme.textTheme.bodyLarge?.color,
           fontSize: 17,
@@ -317,7 +319,11 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
   Widget buildForeground(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
+        padding: const EdgeInsetsDirectional.only(
+          start: 12.0,
+          end: 12.0,
+          bottom: 12.0,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -346,7 +352,7 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
       child: AnimatedOpacity(
         duration: kThemeAnimationDuration,
         opacity: isSavingEntity ? 1 : 0,
-        child: _WechatLoading(tip: Constants.textDelegate.saving),
+        child: _WechatLoading(tip: Singleton.textDelegate.saving),
       ),
     );
   }
@@ -356,7 +362,7 @@ class CameraPickerViewerState extends State<CameraPickerViewer> {
     if (hasErrorWhenInitializing) {
       return Center(
         child: Text(
-          Constants.textDelegate.loadFailed,
+          Singleton.textDelegate.loadFailed,
           style: const TextStyle(inherit: false),
         ),
       );

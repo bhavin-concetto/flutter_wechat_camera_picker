@@ -3,18 +3,18 @@
 // in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:wechat_picker_library/wechat_picker_library.dart';
 
-import '../constants/styles.dart';
 import '../internals/methods.dart';
 
-class CameraProgressButton extends StatefulWidget {
+final class CameraProgressButton extends StatefulWidget {
   const CameraProgressButton({
     super.key,
     required this.isAnimating,
     required this.isBusy,
     required this.size,
     required this.ringsWidth,
-    this.ringsColor = wechatThemeColor,
+    this.ringsColor = defaultThemeColorWeChat,
     this.duration = const Duration(seconds: 15),
   });
 
