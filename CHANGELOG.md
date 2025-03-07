@@ -6,6 +6,81 @@ that can be found in the LICENSE file. -->
 
 See the [Migration Guide](guides/migration_guide.md) for breaking changes between versions.
 
+## 4.3.7
+
+### Fixes
+
+- Fix semantics with the capture button.
+- Avoid potential null operations when saving the entity.
+
+## 4.3.6
+
+### Fixes
+
+- Predicate the flash mode correctly when retrying the initialization.
+
+## 4.3.5
+
+### Improvements
+
+- Allows `sensor_plus` v6.
+
+## 4.3.4
+
+### Fixes
+
+- Fix preview file delete predication.
+
+## 4.3.3
+
+### New features
+
+- Adds `CameraPickerConfig.onPickConfirmed` to gets called when an asset entity is confirmed to be picked.
+- Introduces `CameraPickerConfig.permissionRequestOption`.
+
+### Improvements
+
+- Evicts the captured image cache once returned from the viewer.
+- Allows `camera_android: ^0.10.9+6`.
+
+## 4.3.2
+
+### Fixes
+
+- Fix button displays when tap to record.
+- Prevent camera description exceptions when initializing the camera in the lifecycle callback.
+
+### Improvements
+
+- Use more precise overlay styles.
+- Switching between different lens with a single camera by default.
+- Always delete the preview file when popping from the preview.
+
+## 4.3.1
+
+### Improvements
+
+- Downgrades the default resolution preset from `max` to `ultraHigh`.
+- Improves pinch zooming experiences.
+- Do not wait for focus mode and exposure mode to reset.
+- Updates the capture actions section size to compatible with more cases.
+
+## 4.3.0+1
+
+### Fixes
+
+- Fixes the breaking `ColorScheme.background` implementation on older Flutter SDKs.
+
+## 4.3.0
+
+### Improvements
+
+- Adapt the latest interface of WeChat.
+
+### Fixes
+
+- Constraints `camera_android` version to resolves https://github.com/flutter/flutter/issues/150549.
+
 ## 4.2.2
 
 ### Fixes
