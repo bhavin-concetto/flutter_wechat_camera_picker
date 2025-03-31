@@ -3,6 +3,7 @@
 // in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 import '../extensions/l10n_extensions.dart';
@@ -32,9 +33,34 @@ List<PickMethod> pickMethods(BuildContext context) {
       description: context.l10n.pickMethodVideosDescription,
       method: (BuildContext context) => CameraPicker.pickFromCamera(
         context,
-        pickerConfig: const CameraPickerConfig(
+        pickerConfig: CameraPickerConfig(
+          preferredFlashMode: FlashMode.auto,
+          textDelegate: CustomPickerTextDelegate(),
           enableRecording: true,
           onlyEnableRecording: true,
+          enableTapRecording: true,
+          enableAudio: false,
+          shouldAutoPreviewVideo: false,
+          resolutionPreset: ResolutionPreset.medium,
+          lockCaptureOrientation: DeviceOrientation.landscapeRight,
+          maximumRecordingDuration: const Duration(minutes: 1),
+          theme: CustomPickerTextDelegate.themeData(
+            const Color(0xff00bc56),
+          ),
+          onXFileCaptured: (file, preview) {
+            var video = file;
+            debugPrint("@232 we got video at ${video?.path}");
+            Navigator.of(context).pop();
+            return true;
+          },
+          onError: (e, s) async {
+            debugPrint("@227 $e :: $s");
+            //PROD: comment this
+            // if (e is CameraException) {
+            //   video = await ImagePicker()
+            //       .pickVideo(source: ImageSource.gallery);
+            // }
+          },
         ),
       ),
     ),
@@ -165,6 +191,50 @@ List<PickMethod> pickMethods(BuildContext context) {
       ),
     ),
   ];
+}
+
+class CustomPickerTextDelegate extends EnglishCameraPickerTextDelegate {
+  @override
+  String get sActionStopRecordingHint => "Record";
+
+  static ThemeData themeData(Color themeColor) {
+    return ThemeData.dark().copyWith(
+      primaryColor: Colors.grey[900],
+      primaryColorLight: Colors.grey[900],
+      primaryColorDark: Colors.grey[900],
+      canvasColor: Colors.grey[850],
+      scaffoldBackgroundColor: Colors.grey[900],
+      cardColor: Colors.grey[900],
+      highlightColor: Colors.transparent,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: themeColor,
+        selectionColor: themeColor.withAlpha(100),
+        selectionHandleColor: themeColor,
+      ),
+      indicatorColor: themeColor,
+      appBarTheme: const AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        elevation: 0,
+      ),
+      buttonTheme: ButtonThemeData(buttonColor: themeColor),
+      colorScheme: ColorScheme(
+        primary: Colors.grey[900]!,
+        primaryContainer: Colors.grey[900],
+        secondary: themeColor,
+        secondaryContainer: themeColor,
+        surface: Colors.grey[900]!,
+        brightness: Brightness.dark,
+        error: const Color(0xffcf6679),
+        onPrimary: Colors.black,
+        onSecondary: Colors.black,
+        onSurface: Colors.white,
+        onError: Colors.black,
+      ),
+    );
+  }
 }
 
 /// Define a regular pick method.

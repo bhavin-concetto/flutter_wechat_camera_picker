@@ -1347,48 +1347,12 @@ class CameraPickerState extends State<CameraPicker>
     required BoxConstraints constraints,
     CameraController? controller,
   }) {
-    const fallbackSize = 150.0;
-    final previewSize = controller?.value.previewSize;
     final orientation = controller?.value.deviceOrientation ??
         MediaQuery.orientationOf(context);
     final isPortrait = orientation.toString().contains('portrait');
-    double effectiveSize;
-    if (controller == null || pickerConfig.enableScaledPreview) {
-      effectiveSize = lastCaptureActionsEffectiveHeight ?? fallbackSize;
-    } else if (previewSize != null) {
-      Size constraintSize = Size(constraints.maxWidth, constraints.maxHeight);
-      if (isPortrait && constraintSize.aspectRatio > 1 ||
-          !isPortrait && constraintSize.aspectRatio < 1) {
-        constraintSize = constraintSize.flipped;
-      }
-      if (isPortrait) {
-        effectiveSize = constraintSize.height -
-            constraintSize.width * previewSize.aspectRatio;
-      } else {
-        effectiveSize = constraintSize.width -
-            constraintSize.height * previewSize.aspectRatio;
-      }
-    } else if (lastCaptureActionsEffectiveHeight != null) {
-      effectiveSize = lastCaptureActionsEffectiveHeight!;
-    } else {
-      // Fallback to a reasonable height.
-      effectiveSize = fallbackSize;
-    }
-    if (effectiveSize <= 0) {
-      realDebugPrint(
-        'Unexpected layout size calculation: $effectiveSize, '
-        'portrait: $isPortrait, '
-        'orientation: $orientation',
-      );
-      effectiveSize = fallbackSize;
-    } else if (effectiveSize < fallbackSize) {
-      effectiveSize = fallbackSize;
-    }
-    lastCaptureActionsEffectiveHeight = effectiveSize;
-    return Container(
-      width: isPortrait ? null : effectiveSize,
-      height: isPortrait ? effectiveSize : null,
-      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+    return SizedBox(
+      width: isPortrait ? null : 118,
+      height: isPortrait ? 118 : null,
       child: Flex(
         direction: isPortrait ? Axis.horizontal : Axis.vertical,
         verticalDirection: orientation == DeviceOrientation.landscapeLeft
@@ -1430,13 +1394,8 @@ class CameraPickerState extends State<CameraPicker>
   /// The shooting button.
   /// 拍照按钮
   Widget buildCaptureButton(BuildContext context, BoxConstraints constraints) {
-    final showProgressIndicator =
-        isCaptureButtonTapDown || MediaQuery.accessibleNavigationOf(context);
-
-    if (!showProgressIndicator && isRecordingVideo) {
-      return const SizedBox.shrink();
-    }
-    const size = Size.square(82.0);
+    const Size outerSize = Size.square(115);
+    const Size innerSize = Size.square(82);
     return MergeSemantics(
       child: Semantics(
         label: isRecordingVideo
@@ -1469,19 +1428,21 @@ class CameraPickerState extends State<CameraPicker>
             onLongPressCancel: () =>
                 safeSetState(() => isCaptureButtonTapDown = false),
             child: SizedBox.fromSize(
-              size: size,
+              size: outerSize,
               child: Stack(
-                fit: StackFit.expand,
-                children: [
+                alignment: Alignment.center,
+                children: <Widget>[
                   AnimatedContainer(
-                    duration: const Duration(microseconds: 100),
-                    padding: EdgeInsets.all(isCaptureButtonTapDown ? 16 : 8),
+                    duration: kThemeChangeDuration,
+                    width: isShootingButtonAnimate
+                        ? outerSize.width
+                        : innerSize.width,
+                    height: isShootingButtonAnimate
+                        ? outerSize.height
+                        : innerSize.height,
+                    padding: EdgeInsets.all(isShootingButtonAnimate ? 41 : 11),
                     decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.white,
-                        strokeAlign: BorderSide.strokeAlignCenter,
-                        width: 2,
-                      ),
+                      color: Theme.of(context).canvasColor.withOpacity(0.85),
                       shape: BoxShape.circle,
                     ),
                     child: const DecoratedBox(
@@ -1496,10 +1457,10 @@ class CameraPickerState extends State<CameraPicker>
                       quarterTurns:
                           enableScaledPreview ? 0 : cameraQuarterTurns,
                       child: CameraProgressButton(
-                        isAnimating:
-                            showProgressIndicator && isShootingButtonAnimate,
+                        isAnimating: isShootingButtonAnimate,
+                        isBusy: isControllerBusy,
                         duration: pickerConfig.maximumRecordingDuration!,
-                        size: size,
+                        size: outerSize,
                         ringsColor: theme.indicatorColor,
                         ringsWidth: 3,
                       ),
@@ -1811,6 +1772,22 @@ class CameraPickerState extends State<CameraPicker>
       preview = Stack(
         children: <Widget>[
           preview,
+          Positioned.fill(
+            child: ExcludeSemantics(
+              child: RotatedBox(
+                quarterTurns: cameraQuarterTurns,
+                child: Align(
+                  alignment: {
+                    DeviceOrientation.portraitUp: Alignment.bottomCenter,
+                    DeviceOrientation.portraitDown: Alignment.topCenter,
+                    DeviceOrientation.landscapeLeft: Alignment.centerRight,
+                    DeviceOrientation.landscapeRight: Alignment.centerLeft,
+                  }[cameraValue.deviceOrientation]!,
+                  child: buildCaptureTips(innerController),
+                ),
+              ),
+            ),
+          ),
           if (pickerConfig.enableSetExposure)
             buildExposureDetector(context, constraints),
           buildFocusingPoint(
@@ -1888,7 +1865,8 @@ class CameraPickerState extends State<CameraPicker>
             child: buildSettingActions(context),
           ),
           const Spacer(),
-          ExcludeSemantics(child: buildCaptureTips(innerController)),
+          if (enableScaledPreview)
+            ExcludeSemantics(child: buildCaptureTips(innerController)),
           Semantics(
             sortKey: const OrdinalSortKey(2),
             hidden: innerController == null,
